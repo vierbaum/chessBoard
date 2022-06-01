@@ -19,6 +19,7 @@ impl Board {
      pub fn makeMove(&mut self, from: [i32; 2], to: [i32; 2]) {
          self.board[to[0] as usize][to[1] as usize] = self.board[from[0] as usize][from[1] as usize];
          self.board[from[0] as usize][from[1] as usize] = '0';
+         self.moves.push([from, to]);
      }
 
     pub fn boardFromFen(&mut self) {
@@ -48,5 +49,94 @@ impl Board {
             }
             println!("");
         }
+    }
+
+    pub fn genFen(&self) -> String {
+        let mut fen = String::new();
+        let mut spaceCount = 0;
+
+        for y in 0..8 {
+            for x in 0..8 {
+                if self.board[x][y] == '0' {
+                    spaceCount += 1;
+                }
+                else if self.board[x][y] != '0' {
+                    if spaceCount > 0 {
+                        fen.push((spaceCount + 48) as u8 as char);
+                    }
+                    fen.push(self.board[x][y]);
+                    spaceCount = 0;
+                }
+
+            }
+            if spaceCount > 0 {
+                fen.push((spaceCount + 48) as u8 as char);
+            }
+            fen.push('/');
+            spaceCount = 0;
+        }
+
+        return fen;
+
+    }
+
+    pub fn genSemiLegalMoves(&mut self, piece: [i32; 2]) -> Vec<[i32;2]> {
+        let mut moves = Vec::new();
+
+        let pieceid = self.board[piece[0] as usize][piece[1] as usize];
+
+        if pieceid == 'K' || pieceid == 'k' {
+            for x in piece[0] - 1 .. piece[0] + 2 {
+                for y in piece[1] - 1 .. piece[1] + 2 {
+                    if x < 8 && x >= 0 && y < 8 && y >= 0 && [x, y] != piece {
+                        moves.push([x, y]);
+                    }
+                }
+            }
+        }
+
+        else if pieceid == 'P' {
+            moves.push([piece[0], piece[1] - 1]);
+            moves.push([piece[0], piece[1] - 2]);
+            moves.push([piece[0] - 1, piece[1] - 1]);
+            moves.push([piece[0] + 1, piece[1] - 1]);
+        }
+
+        else if pieceid == 'p' {
+            moves.push([piece[0], piece[1] + 1]);
+            moves.push([piece[0], piece[1] + 2]);
+            moves.push([piece[0] - 1, piece[1] + 1]);
+            moves.push([piece[0] + 1, piece[1] + 1]);
+        }
+
+        else if pieceid == 'N' || pieceid == 'n' {
+            moves.push([piece[0] - 1, piece[1] + 2]);
+            moves.push([piece[0] + 1, piece[1] + 2]);
+            moves.push([piece[0] - 1, piece[1] - 2]);
+            moves.push([piece[0] + 1, piece[1] - 2]);
+
+            moves.push([piece[0] - 2, piece[1] + 1]);
+            moves.push([piece[0] + 2, piece[1] + 1]);
+            moves.push([piece[0] - 2, piece[1] - 1]);
+            moves.push([piece[0] + 2, piece[1] - 1]);
+        }
+
+        else if pieceid == 'R' || pieceid == 'r' || pieceid == 'Q' || pieceid == 'q' {
+            for x in 0..8 {
+                moves.push([x, piece[1]]);
+            }
+            for y in 0..8 {
+                moves.push([piece[0], y]);
+            }
+        }
+
+        if pieceid == 'B' || pieceid == 'b' || pieceid == 'Q' || pieceid == 'q' {
+            for x in 0..8 {
+                moves.push([x, x - piece[0] + piece[1]]);
+                moves.push([x, piece[1] + piece[0] - x]);
+            }
+        }
+
+        return moves;
     }
 }

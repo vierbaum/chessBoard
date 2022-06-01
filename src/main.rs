@@ -9,6 +9,7 @@ fn main() {
     b.boardFromFen();
     b.print();
 
+
     let mut g = gui::Gui::new(704);
     let mut firstSquare = [8, 8];
     'running: loop {
@@ -38,7 +39,7 @@ fn main() {
                                 b.selSquare = [8, 8];
                             }
 
-                        } else {
+                        } else if mouse_btn == sdl2::mouse::MouseButton::Right{
                             // already highligted
                             if b.highlightedSquares.contains(&[x, y]) {
                                 // remove
@@ -47,6 +48,10 @@ fn main() {
                             } else {
                                 b.highlightedSquares.push([x, y]);
 
+                            }
+                        } else {
+                            for s in b.genSemiLegalMoves(firstSquare) {
+                                b.highlightedSquares.push(s);
                             }
                         }
                     }
